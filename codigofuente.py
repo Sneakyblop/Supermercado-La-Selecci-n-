@@ -1,10 +1,15 @@
 def mostrar_catalogo(catalogo):
     """Muestra los productos disponibles con su precio."""
     print("\nCatálogo de productos:")
-    print("Código | Producto | Precio")
-    print("--------------------------")
+    print("Código | Producto     | Precio")
+    print("-----------------------------------")
     for codigo, producto in catalogo.items():
-        print(f"{codigo:>6} | {producto['nombre']:<12} | ${producto['precio']:.2f}")
+        precio = producto['precio']
+        if producto.get('unidad') == 'kg':
+            precio_text = f"${precio:.2f}/kg"
+        else:
+            precio_text = f"${precio:.2f}"
+        print(f"{codigo:>6} | {producto['nombre']:<12} | {precio_text:<10}")
 
 def validar_numero_entero(mensaje, minimo=0, permitir_cero=False):
     """Solicita un número entero y valida que cumpla con el rango pedido."""
@@ -19,7 +24,44 @@ def validar_numero_entero(mensaje, minimo=0, permitir_cero=False):
         except ValueError:
             print("Error: ingrese un número entero válido.")
 
-def registrar_compra(catalogo):
+
+def validar_numero_real(mensaje, minimo=0.0):
+    """Solicita un número real y valida que sea mayor o igual al mínimo."""
+    while True:
+        try:
+            valor = float(input(mensaje).strip().replace(',', '.'))
+            if valor >= minimo:
+                return valor
+            print(f"Error: el valor debe ser mayor o igual a {minimo}.")
+        except ValueError:
+            print("Error: ingrese un número válido.")
+
+
+def seleccionar_peso():
+    """Solicita una cantidad en kilos o gramos y devuelve el valor en kilos."""
+    while True:
+        unidad = input("¿Desea ingresar la cantidad en kilos (k) o gramos (g)? ").strip().lower()
+        if unidad in ("k", "kg", "kilo", "kilos"):
+            return validar_numero_real("Ingrese la cantidad en kilos: ", minimo=0.01)
+        if unidad in ("g", "gr", "gramo", "gramos"):
+            gramos = validar_numero_real("Ingrese la cantidad en gramos: ", minimo=1)
+            return gramos / 1000
+        print("Error: ingrese 'k' para kilos o 'g' para gramos.")
+
+
+def calcular_descuento_por_equipo(producto, equipo):
+    """Calcula el descuento por equipo según el producto."""
+    tags = producto.get("tags", [])
+    if equipo == "Boca" and any(tag in tags for tag in ("polenta", "chancho")):
+        return 0.15
+    if equipo == "River" and any(tag in tags for tag in ("pollo", "fideos")):
+        return 0.15
+    if equipo == "Independiente":
+        return 0.05
+    return 0.0
+
+
+def registrar_compra(catalogo, equipo):
     """Permite cargar productos al carrito hasta que el usuario finalice."""
     carrito = []
 
@@ -36,42 +78,56 @@ def registrar_compra(catalogo):
             print("Error: código inexistente. Intente nuevamente.")
             continue
 
-        cantidad = validar_numero_entero("Ingrese la cantidad: ", minimo=1)
-
         producto = catalogo[codigo]
+        if producto.get("unidad") == "kg":
+            cantidad = seleccionar_peso()
+        else:
+            cantidad = validar_numero_entero("Ingrese la cantidad: ", minimo=1)
+
         subtotal_linea = producto["precio"] * cantidad
 
-        descuento_linea = 0
+        descuento_cantidad = 0.0
         if cantidad >= 3:
-            descuento_linea = subtotal_linea * 0.10
+            descuento_cantidad = subtotal_linea * 0.10
 
-        total_linea = subtotal_linea - descuento_linea
+        descuento_equipo = calcular_descuento_por_equipo(producto, equipo)
+        descuento_equipo_monto = subtotal_linea * descuento_equipo
+
+        total_descuento_linea = descuento_cantidad + descuento_equipo_monto
+        total_linea = subtotal_linea - total_descuento_linea
 
         carrito.append({
             "codigo": codigo,
             "nombre": producto["nombre"],
             "precio": producto["precio"],
             "cantidad": cantidad,
+            "unidad": producto.get("unidad", "unidad"),
             "subtotal": subtotal_linea,
-            "descuento": descuento_linea,
+            "descuento": total_descuento_linea,
+            "descuento_cantidad": descuento_cantidad,
+            "descuento_equipo": descuento_equipo_monto,
             "total": total_linea
         })
 
-        print(f"Agregado: {cantidad} x {producto['nombre']}")
-        if cantidad >= 3:
+        formato_cantidad = f"{cantidad:.2f} kg" if producto.get("unidad") == "kg" else str(int(cantidad))
+        print(f"Agregado: {formato_cantidad} de {producto['nombre']}")
+        if descuento_cantidad > 0:
             print("¡Promo aplicada! Se otorgó un 10% de descuento por cantidad.")
+        if descuento_equipo > 0:
+            print(f"Descuento de equipo aplicado: {int(descuento_equipo * 100)}% en este producto.")
 
     return carrito
 
 def calcular_total(carrito):
     """Calcula el total general del carrito y aplica un descuento por monto."""
     subtotal_general = sum(item["subtotal"] for item in carrito)
+    total_lineas = sum(item["total"] for item in carrito)
 
     descuento_general = 0.0
-    if subtotal_general > 5000:
-        descuento_general = subtotal_general * 0.05
+    if total_lineas > 5000:
+        descuento_general = total_lineas * 0.05
 
-    total_general = subtotal_general - descuento_general
+    total_general = total_lineas - descuento_general
     return subtotal_general, descuento_general, total_general
 
 def generar_ticket(carrito, subtotal_general, descuento_general, total_general, estadisticas):
@@ -120,7 +176,7 @@ def mostrar_resumen_compra(nombre, carrito, total_general):
 
     print(f"\nGracias por su compra, {nombre}.")
     print("=== RESUMEN DE SU COMPRA ===")
-    print(f"Productos comprados: {productos_totales}")
+    print(f"Productos comprados: {productos_totales:.2f}" if any(item.get('unidad') == 'kg' for item in carrito) else f"Productos comprados: {int(productos_totales)}")
     print(f"Producto más comprado: {producto_mas_comprado}")
     print(f"Valor total a pagar: ${total_general:.2f}")
 
@@ -142,13 +198,36 @@ def solicitar_nombre():
         print("El nombre no puede estar vacío. Intente nuevamente.")
 
 
+def seleccionar_equipo():
+    """Solicita el equipo de fútbol al que pertenece el usuario."""
+    equipos = {
+        "boca": "Boca",
+        "river": "River",
+        "racing": "Racing",
+        "independiente": "Independiente",
+        "otro": "Otro"
+    }
+    while True:
+        equipo = input("¿De qué equipo sos? (Boca/River/Racing/Independiente/Otro): ").strip().lower()
+        if equipo in equipos:
+            equipo_normalizado = equipos[equipo]
+            if equipo_normalizado == "Racing":
+                print("Lo lamentamos, no pensábamos que todavía existían hinchas de este equipo.")
+            return equipo_normalizado
+        print("Equipo inválido. Ingrese Boca, River, Racing, Independiente u Otro.")
+
+
 def main():
     catalogo = {
-        1: {"nombre": "Leche", "precio": 1200},
-        2: {"nombre": "Pan", "precio": 800},
-        3: {"nombre": "Arroz", "precio": 1500},
-        4: {"nombre": "Yogur", "precio": 1000},
-        5: {"nombre": "Galletitas", "precio": 900}
+        1: {"nombre": "Leche", "precio": 1200, "unidad": "unidad"},
+        2: {"nombre": "Pan", "precio": 800, "unidad": "unidad"},
+        3: {"nombre": "Arroz", "precio": 1500, "unidad": "unidad"},
+        4: {"nombre": "Yogur", "precio": 1000, "unidad": "unidad"},
+        5: {"nombre": "Galletitas", "precio": 900, "unidad": "unidad"},
+        6: {"nombre": "Polenta", "precio": 2500, "unidad": "unidad", "tags": ["polenta"]},
+        7: {"nombre": "Chancho", "precio": 2000, "unidad": "kg", "tags": ["chancho"]},
+        8: {"nombre": "Pollo", "precio": 1800, "unidad": "kg", "tags": ["pollo"]},
+        9: {"nombre": "Fideos", "precio": 1400, "unidad": "unidad", "tags": ["fideos"]}
     }
 
     estadisticas = {
@@ -160,6 +239,7 @@ def main():
     }
 
     nombre_usuario = solicitar_nombre()
+    equipo_usuario = seleccionar_equipo()
 
     while True:
         mostrar_menu()
@@ -168,7 +248,7 @@ def main():
         if opcion == "1":
             mostrar_catalogo(catalogo)
         elif opcion == "2":
-            carrito = registrar_compra(catalogo)
+            carrito = registrar_compra(catalogo, equipo_usuario)
             subtotal_general, descuento_general, total_general = calcular_total(carrito)
             if carrito:
                 generar_ticket(carrito, subtotal_general, descuento_general, total_general, estadisticas)
