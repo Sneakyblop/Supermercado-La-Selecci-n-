@@ -1,6 +1,6 @@
 IDEAS PARA AGREGAR:
-De que equipo sos. Según el equipo se le hace el descuento, boca 15% de descuento en polenta, chancho, river en pollo fideos, 
-Preguntar el nombre al usuario
+De que equipo sos. Según el equipo se le hace el descuento, boca 15% de descuento en polenta, chancho, river en pollo fideos, LISTO
+Preguntar el nombre al usuario LISTO
 A Preguntar si quiere factura, C o ticket
 Pago con efectivo descuento, decirle el monto al cliente y que me diga con un billete de cuanto va a pagar y darle su vuelto 
 Pago con tarjeta de crédito y debito 
