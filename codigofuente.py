@@ -198,6 +198,19 @@ def solicitar_nombre():
         print("El nombre no puede estar vacío. Intente nuevamente.")
 
 
+def obtener_descuentos_equipo(equipo):
+    """Devuelve el mensaje de descuentos según el equipo."""
+    if equipo == "Boca":
+        return "Con Boca tenés 15% de descuento en Polenta y Chancho."
+    if equipo == "River":
+        return "Con River tenés 15% de descuento en Pollo y Fideos."
+    if equipo == "Independiente":
+        return "Con Independiente tenés 5% de descuento en cualquier producto."
+    if equipo == "Racing":
+        return "Lo lamentamos, no pensábamos que todavía existían hinchas de este equipo. No hay descuentos especiales definidos."
+    return "No hay descuentos de equipo para tu selección."
+
+
 def seleccionar_equipo():
     """Solicita el equipo de fútbol al que pertenece el usuario."""
     equipos = {
@@ -211,8 +224,8 @@ def seleccionar_equipo():
         equipo = input("¿De qué equipo sos? (Boca/River/Racing/Independiente/Otro): ").strip().lower()
         if equipo in equipos:
             equipo_normalizado = equipos[equipo]
-            if equipo_normalizado == "Racing":
-                print("Lo lamentamos, no pensábamos que todavía existían hinchas de este equipo.")
+            mensaje_descuento = obtener_descuentos_equipo(equipo_normalizado)
+            print(mensaje_descuento)
             return equipo_normalizado
         print("Equipo inválido. Ingrese Boca, River, Racing, Independiente u Otro.")
 
@@ -259,7 +272,8 @@ def main():
         elif opcion == "3":
             mostrar_estadisticas(estadisticas)
         elif opcion == "4":
-            print(f"Gracias por usar el sistema, {nombre_usuario}.")
+            print("Gracias por comprar en La Selección, tu super de confianza.")
+            print("Grupo 20, Com C, AED 2026")
             break
         else:
             print("Opción inválida. Intente nuevamente.")
