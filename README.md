@@ -1,10 +1,17 @@
-IDEAS PARA AGREGAR:
-De que equipo sos. Según el equipo se le hace el descuento, boca 15% de descuento en polenta, chancho, river en pollo fideos, LISTO
-Preguntar el nombre al usuario LISTO
-A Preguntar si quiere factura, C o ticket
-Pago con efectivo descuento, decirle el monto al cliente y que me diga con un billete de cuanto va a pagar y darle su vuelto 
-Pago con tarjeta de crédito y debito 
-Si quiere bolsa aquí entra la de plástico y la de cartón
-Tarjeta de socio. Donde agregan puntos y descuentos según el día de la semana
-Descuentos por jubilos para mayores de 70 
-Preguntarle al usuaireo si es el gerente asi hace las cargas de producros nuevos
+# Sistema de Gestión de Supermercado: "La Selección"
+
+Este proyecto es una aplicación de consola desarrollada en Python que simula el funcionamiento estructurado de una caja de supermercado. Permite gestionar de forma dinámica una compra, aplicar promociones específicas y procesar diferentes métodos de pago.
+
+--------------------------------------------------------------------------------------------
+
+## 👥 Integrantes y Comisión
+* **Comisión:** Com C
+* **Cátedra:** Algoritmos y Estructuras de Datos (AED 2026)
+* **Grupo:** 20
+
+### Integrantes:
+* Galarza, Karla
+* Martinez, Araceli Nazareth
+* Ovelar, Eliana Anahí
+* Pedretti, Maria Teresa
+
