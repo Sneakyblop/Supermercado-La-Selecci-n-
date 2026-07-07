@@ -323,7 +323,16 @@ def main():
                 mostrar_resumen_compra(nombre_usuario, carrito, total_final_pagado)
             else:
                 print("No se registraron productos.")
+                mostrar_resumen_compra(nombre_usuario, carrito, total_general)
+                break
+        elif opcion == "3":
+            mostrar_estadisticas(estadisticas)
+        elif opcion == "4":
+            print("Gracias por comprar en La Selección, tu super de confianza.")
+            print("Grupo 20, Com C, AED 2026")
             break
+        else:
+            print("Opción inválida. Intente nuevamente.")
 
 if __name__ == "__main__":
     try:
