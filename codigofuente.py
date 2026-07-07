@@ -124,13 +124,13 @@ def calcular_total(carrito):
     total_lineas = sum(item["total"] for item in carrito)
 
     descuento_general = 0.0
-    if total_lineas > 5000:
-        descuento_general = total_lineas * 0.05
+    if total_lineas > 90000:
+        descuento_general = min(total_lineas * 0.05, 15000)
 
     total_general = total_lineas - descuento_general
     return subtotal_general, descuento_general, total_general
 
-def generar_ticket(carrito, subtotal_general, descuento_general, total_general, estadisticas):
+def generar_ticket(carrito, subtotal_general, descuento_general, total_general, total_pagado, estadisticas, descuento_efectivo=0.0, interes_credito=0.0, cuotas_credito=1):
     """Imprime el ticket y actualiza las estadísticas del sistema."""
     print("\n=== TICKET DE COMPRA ===")
     print("Producto | Cantidad | Precio unit. | Total")
@@ -146,7 +146,13 @@ def generar_ticket(carrito, subtotal_general, descuento_general, total_general, 
 
     print(f"Subtotal: ${subtotal_general:.2f}")
     print(f"Descuentos aplicados (total): ${total_descuentos:.2f}")
-    print(f"Total a pagar: ${total_general:.2f}")
+    if descuento_general > 0:
+        print("Descuento por compra mayor a $90.000 aplicado (tope $15.000).")
+    if descuento_efectivo > 0:
+        print(f"Descuento por pago en efectivo: ${descuento_efectivo:.2f}.")
+    if interes_credito > 0:
+        print(f"Pago en {cuotas_credito} cuotas con interés: {int(interes_credito * 100)}%.")
+    print(f"Total a pagar: ${total_pagado:.2f}")
 
     estadisticas["ventas_realizadas"] += 1
     estadisticas["monto_total"] += total_general
@@ -235,7 +241,7 @@ def seleccionar_equipo():
         print("Equipo inválido. Ingrese Boca, River, Racing, Independiente u Otro.")
 
 def procesar_pago(total_a_pagar):
-    """Gestiona el método de pago, aplica descuento por efectivo y calcula el vuelto."""
+    """Gestiona el método de pago, aplica descuento por efectivo y calcula el vuelto o interés."""
     print(f"\nMonto final a abonar: ${total_a_pagar:.2f}")
     print("Seleccione método de pago:")
     print("1. Efectivo (10% de descuento adicional)")
@@ -250,17 +256,26 @@ def procesar_pago(total_a_pagar):
             print(f"¡Descuento por efectivo aplicado! Nuevo total: ${total_con_descuento:.2f}")
             
             while True:
-                # Usamos validar_numero_real que ya la tenés programada en tu archivo
                 pago = validar_numero_real("¿Con cuánto va a pagar? (Monto del billete): ")
                 if pago >= total_con_descuento:
                     vuelto = pago - total_con_descuento
                     print(f"Su vuelto es: ${vuelto:.2f}")
-                    return total_con_descuento
+                    return total_con_descuento, descuento_efectivo, 0.0, 1
                 print("Error: El monto ingresado es menor al total a pagar.")
                 
-        elif opcion in ("2", "3"):
+        elif opcion == "2":
             print("Pago con tarjeta aprobado.")
-            return total_a_pagar
+            return total_a_pagar, 0.0, 0.0, 1
+
+        elif opcion == "3":
+            cuotas = validar_numero_entero("¿En cuántas cuotas desea pagar? (1, 2, 3 o 6): ", minimo=1)
+            if cuotas not in (1, 2, 3, 6):
+                print("Seleccione 1, 2, 3 o 6 cuotas.")
+                continue
+            interes_porcentaje = {1: 0.0, 2: 0.07, 3: 0.12, 6: 0.15}[cuotas]
+            total_con_interes = total_a_pagar * (1 + interes_porcentaje)
+            print(f"Pago en {cuotas} cuotas con interés del {int(interes_porcentaje * 100)}%. Total: ${total_con_interes:.2f}")
+            return total_con_interes, 0.0, interes_porcentaje, cuotas
             
         print("Opción inválida. Intente nuevamente.")
 
@@ -301,10 +316,10 @@ def main():
                 subtotal_general, descuento_general, total_general = calcular_total(carrito)
                 
                 # 2. LLAMAMOS A LA FUNCIÓN: Le pasamos el total_general y guardamos el resultado final en una nueva variable
-                total_final_pagado = procesar_pago(total_general)
+                total_final_pagado, descuento_efectivo, interes_credito, cuotas_credito = procesar_pago(total_general)
                 
-                # 3. Imprimimos el ticket y el resumen con el total_final_pagado (que ya tiene el descuento de efectivo si corresponde)
-                generar_ticket(carrito, subtotal_general, descuento_general, total_final_pagado, estadisticas)
+                # 3. Imprimimos el ticket y el resumen con el total_final_pagado (que ya tiene el descuento de efectivo o interés si corresponde)
+                generar_ticket(carrito, subtotal_general, descuento_general, total_general, total_final_pagado, estadisticas, descuento_efectivo=descuento_efectivo, interes_credito=interes_credito, cuotas_credito=cuotas_credito)
                 mostrar_resumen_compra(nombre_usuario, carrito, total_final_pagado)
             else:
                 print("No se registraron productos.")
