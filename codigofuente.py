@@ -130,7 +130,7 @@ def calcular_total(carrito):
     total_general = total_lineas - descuento_general
     return subtotal_general, descuento_general, total_general
 
-def generar_ticket(carrito, subtotal_general, descuento_general, total_general, total_pagado, estadisticas, descuento_efectivo=0.0, interes_credito=0.0, cuotas_credito=1):
+def generar_ticket(carrito, subtotal_general, descuento_general, total_general, total_pagado, estadisticas, descuento_efectivo=0.0, interes_credito=0.0, cuotas_credito=1, descuento_jubilado=0.0):
     """Imprime el ticket y actualiza las estadísticas del sistema."""
     print("\n=== TICKET DE COMPRA ===")
     print("Producto | Cantidad | Precio unit. | Total")
@@ -145,9 +145,12 @@ def generar_ticket(carrito, subtotal_general, descuento_general, total_general, 
     total_descuentos = subtotal_general - total_general
 
     print(f"Subtotal: ${subtotal_general:.2f}")
+    print(f"Subtotal: ${subtotal_general:.2f}")
     print(f"Descuentos aplicados (total): ${total_descuentos:.2f}")
     if descuento_general > 0:
         print("Descuento por compra mayor a $90.000 aplicado (tope $15.000).")
+    if descuento_jubilado > 0: #NUEVAS LÍNEA
+        print(f"Beneficio Jubilados (15%): -${descuento_jubilado:.2f}")
     if descuento_efectivo > 0:
         print(f"Descuento por pago en efectivo: ${descuento_efectivo:.2f}.")
     if interes_credito > 0:
@@ -287,6 +290,15 @@ def cargar_producto(catalogo):
     }
     print(f"Producto agregado: {codigo} - {nombre} (${precio:.2f}/{unidad})")
 
+def solicitar_edad():
+    """Solicita la edad del usuario para verificar si aplica descuento de jubilado."""
+    # Reutilizamos la función validar_numero_entero que ya programaron
+    edad = validar_numero_entero("Por favor, ingrese su edad: ", minimo=1)
+    if edad >= 70:
+        print("¡Beneficio jubilado activo! Se le otorgará un 15% de descuento en el total de su compra.")
+    else :
+        print("No sabemos si es bueno o malo, pero por el momento no tienes acceso a este beneficio.")
+    return edad
 
 def solicitar_nombre():
     """Solicita el nombre del usuario antes de iniciar el sistema."""
@@ -392,6 +404,7 @@ def main():
     es_gerente = preguntar_si_gerente()
     nombre_gerente = None
     nombre_usuario = None
+    edad_usuario = 0
     equipo_usuario = None
 
     if es_gerente:
@@ -399,6 +412,7 @@ def main():
         print(f"Bienvenido, {nombre_gerente}. Como gerente tiene permitida la carga de productos nuevos.")
     else:
         nombre_usuario = solicitar_nombre()
+        edad_usuario = solicitar_edad()  # NUEVA LÍNEA
         equipo_usuario = seleccionar_equipo()
 
     while True:
@@ -421,11 +435,20 @@ def main():
                 # 1. Calculamos los totales iniciales de la compra
                 subtotal_general, descuento_general, total_general = calcular_total(carrito)
                 
-                # 2. LLAMAMOS A LA FUNCIÓN: Le pasamos el total_general y guardamos el resultado final en una nueva variable
+                # DESCUENTO POR JUBILADO
+                descuento_jubilado = 0.0
+                if edad_usuario >= 70:
+                    descuento_jubilado = total_general * 0.15
+                    total_general -= descuento_jubilado
+                
+                # 2. LLAMAMOS A LA FUNCIÓN: Le pasamos el total_general ya modificado
                 total_final_pagado, descuento_efectivo, interes_credito, cuotas_credito = procesar_pago(total_general)
                 
-                # 3. Imprimimos el ticket y el resumen con el total_final_pagado (que ya tiene el descuento de efectivo o interés si corresponde)
-                generar_ticket(carrito, subtotal_general, descuento_general, total_general, total_final_pagado, estadisticas, descuento_efectivo=descuento_efectivo, interes_credito=interes_credito, cuotas_credito=cuotas_credito)
+                # 3. Imprimimos el ticket pasando el nuevo parámetro descuento_jubilado
+                generar_ticket(carrito, subtotal_general, descuento_general, total_general, total_final_pagado, estadisticas, 
+                               descuento_efectivo=descuento_efectivo, interes_credito=interes_credito, cuotas_credito=cuotas_credito,
+                               descuento_jubilado=descuento_jubilado) # <- MODIFICADO
+                
                 mostrar_resumen_compra(nombre_usuario, carrito, total_final_pagado)
                 print("\nLa compra finalizó correctamente. Puede volver al menú para ver estadísticas o salir con la opción 4.")
             else:
