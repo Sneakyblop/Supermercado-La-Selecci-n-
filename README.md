@@ -21,7 +21,7 @@ El sistema simula la experiencia de una línea de cajas mediante un menú intera
 * **Sistema de Descuentos:** * Aplica un 10% de descuento automático en líneas de productos con 3 o más unidades.
   * Integra descuentos personalizados por el club de fútbol del cliente (ej. 15% en productos seleccionados para hinchas de Boca y River, o 5% general para Independiente).
   * Aplica un 5% de descuento general en compras mayores a $90000, con un tope de reintegro de 15 mil.
-* **Procesamiento de Pagos:** Permite seleccionar pago con tarjeta (crédito/débito) o efectivo, otorgando un 10% de descuento adicional por pago en efectivo y calculando automáticamente el vuelto exacto del cliente.
+* **Procesamiento de Pagos:** Permite seleccionar pago con tarjeta (crédito/débito) o efectivo, otorgando un 10% de descuento adicional por pago en efectivo y calculando automáticamente el vuelto exacto del cliente, agregando que las tarjetas de crédito tendran aumentos por cada cantidad de cuotas que elija el usuario.
 * **Estadísticas:** Registra el total de ventas del usuario, su compra acumulada, el total de unidades vendidas y calcula cuál fue el producto más vendido.
 
 ## Instrucciones
