@@ -139,8 +139,13 @@ def generar_ticket(carrito, subtotal_general, descuento_general, total_general, 
     for item in carrito:
         print(f"{item['nombre']} | {item['cantidad']} | ${item['precio']:.2f} | ${item['total']:.2f}")
 
+    # El descuento_general que se recibe corresponde únicamente al
+    # descuento adicional por monto (5% si corresponde). Los descuentos
+    # aplicados por producto ya fueron restados en los totales por línea.
+    total_descuentos = subtotal_general - total_general
+
     print(f"Subtotal: ${subtotal_general:.2f}")
-    print(f"Descuento aplicado: ${descuento_general:.2f}")
+    print(f"Descuentos aplicados (total): ${total_descuentos:.2f}")
     print(f"Total a pagar: ${total_general:.2f}")
 
     estadisticas["ventas_realizadas"] += 1
@@ -174,7 +179,7 @@ def mostrar_resumen_compra(nombre, carrito, total_general):
     if carrito:
         producto_mas_comprado = max(carrito, key=lambda item: item['cantidad'])['nombre']
 
-    print(f"\nGracias por su compra, {nombre}.")
+    print(f"\nGracias por su compra, Grupo 20.")
     print("=== RESUMEN DE SU COMPRA ===")
     print(f"Productos comprados: {productos_totales:.2f}" if any(item.get('unidad') == 'kg' for item in carrito) else f"Productos comprados: {int(productos_totales)}")
     print(f"Producto más comprado: {producto_mas_comprado}")
@@ -207,7 +212,7 @@ def obtener_descuentos_equipo(equipo):
     if equipo == "Independiente":
         return "Con Independiente tenés 5% de descuento en cualquier producto."
     if equipo == "Racing":
-        return "Lo lamentamos, no pensábamos que todavía existían hinchas de este equipo. No hay descuentos especiales definidos."
+        return "Lo lamentamos, no pensábamos que todavía existían hinchas de este equipo. No hay descuentos por el momento."
     return "No hay descuentos de equipo para tu selección."
 
 
