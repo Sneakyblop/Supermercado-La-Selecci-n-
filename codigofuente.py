@@ -50,13 +50,13 @@ def seleccionar_peso():
 
 
 def calcular_descuento_por_equipo(producto, equipo):
-    """Calcula el descuento por equipo según el producto."""
+    """Calcula el descuento por equipo según el equipo del cliente y la etiqueta del producto."""
     tags = producto.get("tags", [])
-    if equipo == "Boca" and any(tag in tags for tag in ("polenta", "chancho")):
+    if equipo == "Boca" and "boca" in tags:
         return 0.15
-    if equipo == "River" and any(tag in tags for tag in ("pollo", "fideos")):
+    if equipo == "River" and "river" in tags:
         return 0.15
-    if equipo == "Independiente":
+    if equipo == "Independiente" and "independiente" in tags:
         return 0.05
     return 0.0
 
@@ -173,6 +173,12 @@ def generar_ticket(carrito, subtotal_general, descuento_general, total_general, 
 def mostrar_estadisticas(estadisticas):
     """Muestra las estadísticas generales del supermercado."""
     print("\n=== ESTADÍSTICAS ===")
+    if estadisticas['ventas_realizadas'] == 0:
+        print("No se han registrado ventas aún.")
+        print(f"Ventas realizadas: {estadisticas['ventas_realizadas']}")
+        print(f"Productos vendidos: {estadisticas['productos_vendidos']}")
+        print(f"Monto total facturado: ${estadisticas['monto_total']:.2f}")
+        return
     print(f"Ventas realizadas: {estadisticas['ventas_realizadas']}")
     print(f"Productos vendidos: {estadisticas['productos_vendidos']}")
     print(f"Monto total facturado: ${estadisticas['monto_total']:.2f}")
@@ -191,13 +197,96 @@ def mostrar_resumen_compra(nombre, carrito, total_general):
     print(f"Producto más comprado: {producto_mas_comprado}")
     print(f"Valor total a pagar: ${total_general:.2f}")
 
-def mostrar_menu():
+def mostrar_menu(es_gerente=False):
     """Imprime el menú principal del sistema."""
     print("\n=== SUPERMERCADO ===")
     print("1. Ver catálogo")
-    print("2. Iniciar compra")
-    print("3. Ver estadísticas")
-    print("4. Salir")
+    if es_gerente:
+        print("2. Cargar producto nuevo")
+        print("3. Ver estadísticas")
+        print("4. Salir")
+    else:
+        print("2. Iniciar compra")
+        print("3. Ver estadísticas")
+        print("4. Salir")
+
+
+def preguntar_si_gerente():
+    """Pregunta si el usuario es gerente."""
+    while True:
+        respuesta = input("¿Es usted gerente? (s/n): ").strip().lower()
+        if respuesta in ("s", "si"):
+            return True
+        if respuesta in ("n", "no"):
+            return False
+        print("Responda con 's' o 'n'.")
+
+
+def solicitar_nombre_gerente():
+    """Solicita el nombre del gerente."""
+    while True:
+        nombre = input("Por favor, ingrese su nombre de gerente: ").strip()
+        if nombre:
+            return nombre
+        print("El nombre no puede estar vacío. Intente nuevamente.")
+
+
+def generar_codigo_nuevo(catalogo):
+    """Genera un nuevo código para un producto añadido."""
+    return max(catalogo.keys(), default=0) + 1
+
+
+def cargar_producto(catalogo):
+    """Permite a un gerente cargar un producto nuevo al catálogo."""
+    print("\n=== CARGA DE PRODUCTO NUEVO ===")
+    nombre = input("Nombre del producto: ").strip()
+    while not nombre:
+        print("El nombre no puede estar vacío.")
+        nombre = input("Nombre del producto: ").strip()
+
+    precio = validar_numero_real("Precio unitario: ", minimo=1)
+
+    while True:
+        unidad = input("Unidad del producto (unidad/kg): ").strip().lower()
+        if unidad in ("unidad", "kg"):
+            break
+        print("Ingrese 'unidad' o 'kg'.")
+
+    tags = []
+    print("¿El producto debe recibir descuentos por equipo?")
+    print("1. Boca")
+    print("2. River")
+    print("3. Independiente")
+    print("4. Racing")
+    print("5. Ninguno")
+    while True:
+        opcion = input("Seleccione opción de descuento de equipo (1-5): ").strip()
+        if opcion == "1":
+            tags = ["boca"]
+            break
+        if opcion == "2":
+            tags = ["river"]
+            break
+        if opcion == "3":
+            tags = ["independiente"]
+            break
+        if opcion == "4":
+            tags = ["racing"]
+            break
+        if opcion == "5":
+            tags = []
+            break
+        print("Opción inválida. Ingrese un número entre 1 y 5.")
+
+    codigo = generar_codigo_nuevo(catalogo)
+    catalogo[codigo] = {
+        "nombre": nombre,
+        "precio": precio,
+        "unidad": unidad,
+        "tags": tags
+    }
+    print(f"Producto agregado: {codigo} - {nombre} (${precio:.2f}/{unidad})")
+
 
 def solicitar_nombre():
     """Solicita el nombre del usuario antes de iniciar el sistema."""
@@ -212,13 +301,13 @@ def solicitar_nombre():
 def obtener_descuentos_equipo(equipo):
     """Devuelve el mensaje de descuentos según el equipo."""
     if equipo == "Boca":
-        return "Con Boca tenés 15% de descuento en Polenta y Chancho."
+        return "Con Boca tenés 15% de descuento en productos promocionados para Boca."
     if equipo == "River":
-        return "Con River tenés 15% de descuento en Pollo y Fideos."
+        return "Con River tenés 15% de descuento en productos promocionados para River."
     if equipo == "Independiente":
-        return "Con Independiente tenés 5% de descuento en cualquier producto."
+        return "Con Independiente tenés 5% de descuento en productos promocionados para Independiente."
     if equipo == "Racing":
-        return "Lo lamentamos, no pensábamos que todavía existían hinchas de este equipo. No hay descuentos por el momento."
+        return "Lo lamentamos, no hay descuentos para Racing por el momento."
     return "No hay descuentos de equipo para tu selección."
 
 
@@ -300,16 +389,33 @@ def main():
         "ventas_por_producto": {}
     }
 
-    nombre_usuario = solicitar_nombre()
-    equipo_usuario = seleccionar_equipo()
+    es_gerente = preguntar_si_gerente()
+    nombre_gerente = None
+    nombre_usuario = None
+    equipo_usuario = None
+
+    if es_gerente:
+        nombre_gerente = solicitar_nombre_gerente()
+        print(f"Bienvenido, {nombre_gerente}. Como gerente tiene permitida la carga de productos nuevos.")
+    else:
+        nombre_usuario = solicitar_nombre()
+        equipo_usuario = seleccionar_equipo()
 
     while True:
-        mostrar_menu()
+        mostrar_menu(es_gerente)
         opcion = input("Seleccione una opción: ").strip()
 
         if opcion == "1":
             mostrar_catalogo(catalogo)
-        elif opcion == "2":
+        elif es_gerente and opcion == "2":
+            cargar_producto(catalogo)
+        elif es_gerente and opcion == "3":
+            mostrar_estadisticas(estadisticas)
+        elif es_gerente and opcion == "4":
+            print("Gracias por comprar en La Selección, tu super de confianza.")
+            print("Grupo 20, Com C, AED 2026")
+            break
+        elif not es_gerente and opcion == "2":
             carrito = registrar_compra(catalogo, equipo_usuario)
             if carrito:
                 # 1. Calculamos los totales iniciales de la compra
@@ -321,13 +427,13 @@ def main():
                 # 3. Imprimimos el ticket y el resumen con el total_final_pagado (que ya tiene el descuento de efectivo o interés si corresponde)
                 generar_ticket(carrito, subtotal_general, descuento_general, total_general, total_final_pagado, estadisticas, descuento_efectivo=descuento_efectivo, interes_credito=interes_credito, cuotas_credito=cuotas_credito)
                 mostrar_resumen_compra(nombre_usuario, carrito, total_final_pagado)
+                print("\nLa compra finalizó correctamente. Puede volver al menú para ver estadísticas o salir con la opción 4.")
             else:
                 print("No se registraron productos.")
-                mostrar_resumen_compra(nombre_usuario, carrito, total_general)
-                break
-        elif opcion == "3":
+            continue
+        elif not es_gerente and opcion == "3":
             mostrar_estadisticas(estadisticas)
-        elif opcion == "4":
+        elif not es_gerente and opcion == "4":
             print("Gracias por comprar en La Selección, tu super de confianza.")
             print("Grupo 20, Com C, AED 2026")
             break
