@@ -185,7 +185,7 @@ def mostrar_resumen_compra(nombre, carrito, total_general):
     if carrito:
         producto_mas_comprado = max(carrito, key=lambda item: item['cantidad'])['nombre']
 
-    print(f"\nGracias por su compra, Grupo 20.")
+    print(f"\nGracias por su compra, {nombre}.")
     print("=== RESUMEN DE SU COMPRA ===")
     print(f"Productos comprados: {productos_totales:.2f}" if any(item.get('unidad') == 'kg' for item in carrito) else f"Productos comprados: {int(productos_totales)}")
     print(f"Producto más comprado: {producto_mas_comprado}")
