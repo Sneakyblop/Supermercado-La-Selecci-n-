@@ -149,7 +149,7 @@ def generar_ticket(carrito, subtotal_general, descuento_general, total_general, 
     print(f"Descuentos aplicados (total): ${total_descuentos:.2f}")
     if descuento_general > 0:
         print("Descuento por compra mayor a $90.000 aplicado (tope $15.000).")
-    if descuento_jubilado > 0: #NUEVAS LÍNEA
+    if descuento_jubilado > 0:
         print(f"Beneficio Jubilados (15%): -${descuento_jubilado:.2f}")
     if descuento_efectivo > 0:
         print(f"Descuento por pago en efectivo: ${descuento_efectivo:.2f}.")
@@ -292,7 +292,6 @@ def cargar_producto(catalogo):
 
 def solicitar_edad():
     """Solicita la edad del usuario para verificar si aplica descuento de jubilado."""
-    # Reutilizamos la función validar_numero_entero que ya programaron
     edad = validar_numero_entero("Por favor, ingrese su edad: ", minimo=1)
     if edad >= 70:
         print("¡Beneficio jubilado activo! Se le otorgará un 15% de descuento en el total de su compra.")
@@ -419,7 +418,7 @@ def main():
         print(f"Bienvenido, {nombre_gerente}. Como gerente tiene permitida la carga de productos nuevos.")
     else:
         dni_usuario = solicitar_dni()
-        edad_usuario = solicitar_edad()  # NUEVA LÍNEA
+        edad_usuario = solicitar_edad()
         equipo_usuario = seleccionar_equipo()
 
     while True:
