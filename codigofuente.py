@@ -194,7 +194,7 @@ def mostrar_resumen_compra(nombre, carrito, total_general):
     if carrito:
         producto_mas_comprado = max(carrito, key=lambda item: item['cantidad'])['nombre']
 
-    print(f"\nGracias por su compra, {nombre}.")
+    print("\nGracias por su compra, vuelva pronto.")
     print("=== RESUMEN DE SU COMPRA ===")
     print(f"Productos comprados: {productos_totales:.2f}" if any(item.get('unidad') == 'kg' for item in carrito) else f"Productos comprados: {int(productos_totales)}")
     print(f"Producto más comprado: {producto_mas_comprado}")
@@ -297,17 +297,17 @@ def solicitar_edad():
     if edad >= 70:
         print("¡Beneficio jubilado activo! Se le otorgará un 15% de descuento en el total de su compra.")
     else :
-        print("No sabemos si es bueno o malo, pero por el momento no tienes acceso a este beneficio.")
+        print("No sabemos si es bueno o malo, pero por el momento no tienes acceso al beneficio de jubilados.")
     return edad
 
-def solicitar_nombre():
-    """Solicita el nombre del usuario antes de iniciar el sistema."""
+def solicitar_dni():
+    """Solicita el DNI del usuario antes de iniciar el sistema."""
     print("Bienvenido al supermercado La Selección.")
     while True:
-        nombre = input("Por favor, ingrese su nombre: ").strip()
-        if nombre:
-            return nombre
-        print("El nombre no puede estar vacío. Intente nuevamente.")
+        dni = input("Por favor, ingrese su DNI: ").strip()
+        if dni:
+            return dni
+        print("El DNI no puede estar vacío. Intente nuevamente.")
 
 
 def obtener_descuentos_equipo(equipo):
@@ -403,7 +403,7 @@ def main():
 
     es_gerente = preguntar_si_gerente()
     nombre_gerente = None
-    nombre_usuario = None
+    dni_usuario = None
     edad_usuario = 0
     equipo_usuario = None
 
@@ -411,7 +411,7 @@ def main():
         nombre_gerente = solicitar_nombre_gerente()
         print(f"Bienvenido, {nombre_gerente}. Como gerente tiene permitida la carga de productos nuevos.")
     else:
-        nombre_usuario = solicitar_nombre()
+        dni_usuario = solicitar_dni()
         edad_usuario = solicitar_edad()  # NUEVA LÍNEA
         equipo_usuario = seleccionar_equipo()
 
@@ -449,7 +449,7 @@ def main():
                                descuento_efectivo=descuento_efectivo, interes_credito=interes_credito, cuotas_credito=cuotas_credito,
                                descuento_jubilado=descuento_jubilado) # <- MODIFICADO
                 
-                mostrar_resumen_compra(nombre_usuario, carrito, total_final_pagado)
+                mostrar_resumen_compra(dni_usuario, carrito, total_final_pagado)
                 print("\nLa compra finalizó correctamente. Puede volver al menú para ver estadísticas o salir con la opción 4.")
             else:
                 print("No se registraron productos.")
