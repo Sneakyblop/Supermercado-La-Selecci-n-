@@ -304,10 +304,17 @@ def solicitar_dni():
     """Solicita el DNI del usuario antes de iniciar el sistema."""
     print("Bienvenido al supermercado La Selección.")
     while True:
-        dni = input("Por favor, ingrese su DNI: ").strip()
-        if dni:
-            return dni
-        print("El DNI no puede estar vacío. Intente nuevamente.")
+        dni = input("Por favor, ingrese su DNI (8 números): ").strip()
+        if not dni:
+            print("El DNI no puede estar vacío. Intente nuevamente.")
+            continue
+        if not dni.isdigit():
+            print("El DNI debe contener solo números. Intente nuevamente.")
+            continue
+        if len(dni) != 8:
+            print("El DNI debe tener exactamente 8 dígitos. Intente nuevamente.")
+            continue
+        return dni
 
 
 def obtener_descuentos_equipo(equipo):
