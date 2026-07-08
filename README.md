@@ -33,3 +33,4 @@ El sistema simula la experiencia de una línea de cajas mediante un menú intera
 ### Pasos para Ejecutar
 1. Descargue o copie este repositorio en su computadora.
 2. Con el archivo llamado "codigofuente" ejecute el archivo con el comando `codigofuente.py` o también puede correr el código desde la parte derecha con el símbolo de run y pone la opción "Run python file".
+   ![image alt](https://github.com/Sneakyblop/Supermercado-La-Selecci-n-/blob/master/Captura%20de%20pantalla%202026-07-08%20103912.png?raw=true)
